@@ -1,0 +1,8 @@
+.vs/
+build/
+obj/
+packages/
+Debug/
+Release/
+
+*.user
