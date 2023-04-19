@@ -3,13 +3,24 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 Console.WriteLine("Finding all movies not accompanied by subtitle files...");
 
 string[] subtitleExts = { ".srt", ".vtt", ".ssa", ".ass", ".smi" };
-string[] movieExts = { ".mp4", ".mkv", ".m4v", ".avi", ".wmv", ".mpg", ".mov", ".ts" };
+string[] movieExts = { ".mp4", ".mkv", ".m4v", ".avi", ".wmv", ".mpg", ".mov", ".ts", ".iso" };
 
 ValueTuple<Int32, Int32> cursorPosition;
 int moviesChecked = 0;
+string scanDir = Directory.GetCurrentDirectory();
+
+// Check command-line argument for a new path
+if (args.Length > 0)
+{
+    string newScanDir = args[0];
+    if (Path.IsPathFullyQualified(newScanDir))
+        scanDir = newScanDir;
+    else
+        scanDir = Path.Combine(scanDir, newScanDir);
+}
 
 List<string> outList = new List<string>();
-ScanDirectory(Directory.GetCurrentDirectory());
+ScanDirectory(scanDir);
 outList.Sort();
 Console.WriteLine("");
 
@@ -30,10 +41,11 @@ Console.WriteLine("Movies without subtitles found: " + outList.Count.ToString())
 Console.WriteLine("Press any key to exit");
 Console.ReadKey();
 
-void ScanDirectory(string currentDir)
+void ScanDirectory(string scanDir)
 {
+    Console.WriteLine("Scanning folder: " + scanDir);
     var movies = new List<string>();
-    foreach (string fileName in Directory.GetFiles(currentDir))
+    foreach (string fileName in Directory.GetFiles(scanDir))
     {
         if (movieExts.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase) == false)
             continue;
@@ -45,7 +57,7 @@ void ScanDirectory(string currentDir)
     }
 
     HashSet<string> excluded = new HashSet<string>();
-    foreach (string fileName in Directory.GetFiles(currentDir))
+    foreach (string fileName in Directory.GetFiles(scanDir))
     {
         if (subtitleExts.Contains(Path.GetExtension(fileName), StringComparer.OrdinalIgnoreCase) == false)
             continue;
@@ -66,7 +78,7 @@ void ScanDirectory(string currentDir)
         outList.Add(movie);
     }
 
-    foreach (var dir in Directory.GetDirectories(currentDir))
+    foreach (var dir in Directory.GetDirectories(scanDir))
         ScanDirectory(dir);
 }
 
